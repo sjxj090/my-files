@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文策專業學院 - 測驗成績鑑定系統</title>
+    <!-- 引入 Tailwind CSS 進行樣式渲染 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide 圖標庫 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        
+        /* 震動動畫效果 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+        
+        /* 隱藏元素用 */
+        .hidden { display: none; }
+
+        /* 輸入框大寫自動轉換 */
+        .uppercase-input { text-transform: uppercase; }
+    </style>
+</head>
+<body class="bg-slate-50/50 min-h-screen flex flex-col selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- 導覽列 -->
+    <nav class="bg-white border-b border-slate-100 sticky top-0 z-50 print:hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-slate-900 p-2 rounded-xl shadow-lg text-blue-400">
+                        <i data-lucide="graduation-cap" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-black text-slate-800 tracking-tight block leading-none">文策專業學院</span>
+                        <span class="text-[10px] text-slate-400 font-bold tracking-[0.2em] uppercase mt-1 block">專業文件策略鑑定機構</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 text-slate-400 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                    <span class="text-[10px] font-bold">臺灣繁體中文</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主內容區 -->
+    <main class="flex-1 flex flex-col">
+        
+        <!-- 查詢介面 (初始顯示) -->
+        <section id="search-view" class="flex-1 flex flex-col items-center justify-center py-12 px-4 sm:px-6 animate-in fade-in duration-500">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">測驗成績查詢</h1>
+                <p class="text-slate-400 text-sm font-medium">請輸入您的測驗憑證資訊以取得詳細鑑定報告</p>
+            </div>
+
+            <div class="w-full max-w-md">
+                <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100">
+                    <form id="search-form" class="space-y-6">
+                        <!-- 編號欄位 -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">測驗卷編號 (ID)</label>
+                            <div class="relative">
+                                <i data-lucide="hash" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                <input type="text" id="input-id" autocomplete="off" placeholder="請輸入編號" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:bg-white focus:border-blue-500 outline-none transition-all font-mono text-sm uppercase-input">
+                            </div>
+                        </div>
+
+                        <!-- 帳號與密碼欄位 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">學員帳號</label>
+                                <div class="relative">
+                                    <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                    <input type="text" id="input-account" autocomplete="off" placeholder="帳號" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:bg-white focus:border-blue-500 outline-none transition-all text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">登入密碼</label>
+                                <div class="relative">
+                                    <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                    <input type="password" id="input-password" autocomplete="new-password" placeholder="密碼" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:bg-white focus:border-blue-500 outline-none transition-all text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 錯誤提示 -->
+                        <div id="error-container" class="hidden flex items-center gap-2 p-3.5 bg-red-50 text-red-600 text-[11px] font-bold rounded-xl border border-red-100 animate-shake">
+                            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                            <span id="error-message"></span>
+                        </div>
+
+                        <!-- 提交按鈕 -->
+                        <button type="submit" id="submit-btn" class="w-full py-4 bg-slate-900 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-slate-200 transition-all flex justify-center items-center gap-2 active:scale-[0.98] mt-2 text-base tracking-widest">
+                            開始查詢
+                        </button>
+                    </form>
+                </div>
+                <p class="mt-8 text-center text-slate-400 text-[10px] font-bold tracking-[0.2em] uppercase">如有查詢疑問，請聯繫學院</p>
+            </div>
+        </section>
+
+        <!-- 鑑定報告結果 (初始隱藏) -->
+        <section id="result-view" class="hidden flex-1 flex items-center justify-center py-10 px-4 print:py-0 print:px-0">
+            <div class="max-w-2xl w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100 print:shadow-none print:border-none print:rounded-none">
+                
+                <!-- 報告頭部 -->
+                <div class="bg-slate-900 p-10 text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                    
+                    <button onclick="handleLogout()" class="absolute top-8 right-8 p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all text-xs font-bold text-white/80 z-20 flex items-center gap-2 print:hidden cursor-pointer active:scale-95">
+                        退出系統 <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                    </button>
+                    
+                    <div class="flex flex-col items-center text-center mb-10 relative z-10">
+                        <div class="w-12 h-1.5 bg-blue-500 mb-6 rounded-full"></div>
+                        <h1 class="text-3xl font-black tracking-tight mb-2">測驗成績鑑定報告書</h1>
+                        <p class="text-blue-400 text-[10px] font-black tracking-[0.4em] uppercase">Professional Certification</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8 border-t border-white/10 pt-10 relative z-10">
+                        <div>
+                            <p class="text-white/40 text-[9px] font-black uppercase tracking-[0.2em] mb-2">受評人員</p>
+                            <p id="res-name" class="text-2xl font-bold tracking-tight"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-white/40 text-[9px] font-black uppercase tracking-[0.2em] mb-2">證書/卷編號</p>
+                            <p id="res-id" class="text-lg font-mono font-bold text-blue-400"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 報告內容 -->
+                <div class="p-10">
+                    <div id="scores-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                        <!-- 分數條由 JS 生成 -->
+                    </div>
+
+                    <div class="flex gap-5 mb-12">
+                        <div class="flex-1 p-7 bg-blue-50 rounded-[2rem] text-center border border-blue-100/50">
+                            <p class="text-blue-600 text-[10px] font-black uppercase mb-1.5 tracking-widest">鑑定均分</p>
+                            <p id="res-avg" class="text-4xl font-black text-blue-900"></p>
+                        </div>
+                        <div class="flex-1 p-7 bg-slate-900 rounded-[2rem] text-center shadow-2xl shadow-slate-300">
+                            <p class="text-white/40 text-[10px] font-black uppercase mb-1.5 tracking-widest">最終等第</p>
+                            <p id="res-status" class="text-3xl font-black text-white"></p>
+                        </div>
+                    </div>
+
+                    <div class="relative p-8 bg-slate-50 rounded-[2rem] border border-slate-100 mb-8">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">學院導師評語</p>
+                        <p id="res-comment" class="text-slate-700 text-sm leading-relaxed font-medium italic relative z-10"></p>
+                        <div class="mt-8 flex justify-between items-end border-t border-slate-200 pt-6">
+                            <div id="res-footer" class="text-[9px] text-slate-400 font-bold font-sans leading-loose text-left"></div>
+                            <div class="w-14 h-14 rounded-full border-2 border-slate-200 flex items-center justify-center opacity-40">
+                                <i data-lucide="check-circle-2" class="w-7 h-7 text-slate-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-dashed border-slate-200 text-center">
+                        <p class="text-[9px] text-slate-400 font-medium">本報告經數位加密驗證，與學院原始存檔資料一致。掃描此頁可進行雲端查核。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-white py-12 border-t border-slate-100 print:hidden text-center">
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">數據分析與文件鑑定中心</p>
+        <p class="text-slate-300 text-[9px] mt-3 font-mono">© 2026 文策專業學院 版權所有</p>
+    </footer>
+
+    <!-- 邏輯腳本 -->
+    <script>
+        // 模擬數據
+        const MOCK_DATA = {
+            examPaperId: 'DEMO-2026-001',
+            account: 'student01',
+            password: '123456',
+            name: '王小明 (測試學員)',
+            average: 100,
+            status: '卓越 (A+)',
+            examDate: '2026-03-31',
+            comment: '該學員在文書邏輯與數據處理展現了極高的專業度，排版美學深具品牌意識，建議可朝向進階文件策劃師職位發展。',
+            scores: [
+                { label: '文書處理能力', val: 100, icon: 'file-text' },
+                { label: '數據分析能力', val: 100, icon: 'bar-chart-3' },
+                { label: '視覺呈現能力', val: 100, icon: 'file-text' },
+                { label: '排版美學邏輯', val: 100, icon: 'graduation-cap' }
+            ]
+        };
+ // 414046數據
+        const MOCK_DATA = {
+            examPaperId: '20260328001',
+            account: 'ˋ414046',
+            password: 'AdFbkX3B2J1',
+            name: '鍾上御',
+            average: 100,
+            status: '卓越 (A+)',
+            examDate: '2026-03-31',
+            comment: '該學員在文書邏輯與數據處理展現了極高的專業度，排版美學深具品牌意識，建議可朝向進階文件策劃師職位發展。',
+            scores: [
+                { label: '文書處理能力', val: 100, icon: 'file-text' },
+                { label: '數據分析能力', val: 100, icon: 'bar-chart-3' },
+                { label: '視覺呈現能力', val: 100, icon: 'file-text' },
+                { label: '排版美學邏輯', val: 100, icon: 'graduation-cap' }
+            ]
+        };
+
+
+        const form = document.getElementById('search-form');
+        const searchView = document.getElementById('search-view');
+        const resultView = document.getElementById('result-view');
+        const errorContainer = document.getElementById('error-container');
+        const errorMessage = document.getElementById('error-message');
+
+        // 初始化圖標
+        lucide.createIcons();
+
+        // 搜尋處理
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('input-id').value.trim().toUpperCase();
+            const acc = document.getElementById('input-account').value.trim();
+            const pass = document.getElementById('input-password').value.trim();
+
+            if (!id || !acc || !pass) {
+                showError('請完整輸入所有必填欄位');
+                return;
+            }
+
+            // 驗證模擬數據
+            if (id === MOCK_DATA.examPaperId && acc === MOCK_DATA.account && pass === MOCK_DATA.password) {
+                renderResult(MOCK_DATA);
+            } else {
+                showError('驗證失敗：編號或帳號密碼不正確');
+            }
+        });
+
+        function showError(msg) {
+            errorMessage.innerText = msg;
+            errorContainer.classList.remove('hidden');
+            setTimeout(() => errorContainer.classList.add('animate-shake'), 10);
+            setTimeout(() => errorContainer.classList.remove('animate-shake'), 500);
+        }
+
+        function renderResult(data) {
+            // 填寫內容
+            document.getElementById('res-name').innerText = data.name;
+            document.getElementById('res-id').innerText = data.examPaperId;
+            document.getElementById('res-avg').innerText = data.average;
+            document.getElementById('res-status').innerText = data.status;
+            document.getElementById('res-comment').innerText = `「 ${data.comment} 」`;
+            document.getElementById('res-footer').innerHTML = `鑑定日期： ${data.examDate}<br/>發行單位： 文策專業學院 (Doc-Strategy Academy)`;
+
+            // 生成分數條
+            const scoresGrid = document.getElementById('scores-grid');
+            scoresGrid.innerHTML = data.scores.map(s => `
+                <div class="group">
+                    <div class="flex items-center justify-between mb-2.5 px-1">
+                        <div class="flex items-center gap-2.5 text-slate-500 text-[11px] font-black uppercase tracking-wider">
+                            <i data-lucide="${s.icon}" class="w-4 h-4 text-blue-500"></i>
+                            ${s.label}
+                        </div>
+                        <span class="text-xl font-black text-emerald-600">${s.val}</span>
+                    </div>
+                    <div class="w-full bg-slate-50 rounded-full h-2.5 overflow-hidden border border-slate-100">
+                        <div class="h-full bg-slate-900 rounded-full transition-all duration-1000" style="width: ${s.val}%"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            // 重新初始化新生成的圖標
+            lucide.createIcons();
+
+            // 切換視圖
+            searchView.classList.add('hidden');
+            resultView.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // 退出系統函式
+        window.handleLogout = function() {
+            // 1. 回到查詢頁面
+            searchView.classList.remove('hidden');
+            resultView.classList.add('hidden');
+
+            // 2. 清空所有輸入欄位 (編號、帳號、密碼)
+            document.getElementById('input-id').value = "";
+            document.getElementById('input-account').value = "";
+            document.getElementById('input-password').value = "";
+
+            // 3. 隱藏錯誤訊息
+            errorContainer.classList.add('hidden');
+            
+            window.scrollTo(0, 0);
+        };
+    </script>
+</body>
+</html>
